@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Statistic, Row, Col } from 'antd';
 import { Account, Transaction } from '../types';
-import { accountApi, transactionApi } from '../services/api';
+import apiService from '../services/api';
+const { accountApi, transactionApi } = apiService;
 
 const Dashboard: React.FC = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -13,8 +14,8 @@ const Dashboard: React.FC = () => {
         accountApi.getAll(),
         transactionApi.getAll(),
       ]);
-      setAccounts(accountsRes);
-      setTransactions(transactionsRes);
+      setAccounts(accountsRes.data);
+      setTransactions(transactionsRes.data);
     } catch (error) {
       console.error('获取数据失败:', error);
     }

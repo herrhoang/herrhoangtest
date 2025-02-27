@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form, Input, message, Card } from 'antd';
 import { PlusOutlined, EditOutlined } from '@ant-design/icons';
 import { Account } from '../types';
-import { accountApi } from '../services/api';
+import apiService from '../services/api';
+const { accountApi } = apiService;
 
 const AccountPage: React.FC = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -13,7 +14,7 @@ const AccountPage: React.FC = () => {
   const fetchAccounts = async () => {
     try {
       const response = await accountApi.getAll();
-      setAccounts(response);
+      setAccounts(response.data);
     } catch (error) {
       console.error('Failed to fetch accounts:', error);
       message.error('获取账户列表失败');

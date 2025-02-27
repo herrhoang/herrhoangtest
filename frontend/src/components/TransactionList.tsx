@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Card, Button, Modal, Form, Input, Select, message } from 'antd';
 import { Transaction, Account, Category } from '../types';
-import { transactionApi, accountApi, categoryApi } from '../services/api';
+import apiService from '../services/api';
+const { transactionApi, accountApi, categoryApi } = apiService;
 
 const { Option } = Select;
 

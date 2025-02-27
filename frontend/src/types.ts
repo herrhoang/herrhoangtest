@@ -2,7 +2,6 @@ export interface Account {
   id: number;
   name: string;
   balance: number;
-  type: string;
   created_at: string;
   updated_at: string;
 }
