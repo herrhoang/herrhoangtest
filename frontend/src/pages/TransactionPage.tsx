@@ -3,7 +3,8 @@ import { Table, Button, Modal, Form, Input, Select, message, Card, DatePicker } 
 import { PlusOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Transaction, Account, Category } from '../types';
-import { transactionApi, accountApi, categoryApi } from '../services/api';
+import apiService from '../services/api';
+const { transactionApi, accountApi, categoryApi } = apiService;
 
 const { Option } = Select;
 

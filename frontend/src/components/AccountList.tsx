@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Card, Button, Modal, Form, Input, message } from 'antd';
 import { Account } from '../types';
-import { accountApi } from '../services/api';
+import apiService from '../services/api';
+const { accountApi } = apiService;
 
 const AccountList: React.FC = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
