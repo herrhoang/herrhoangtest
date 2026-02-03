@@ -58,10 +58,17 @@ func (h *AccountHandler) UpdateAccount(c *gin.Context) {
 		return
 	}
 
-	if err := c.ShouldBindJSON(&account); err != nil {
+	var input struct {
+		Name    string  `json:"name"`
+		Balance float64 `json:"balance"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	account.Name = input.Name
+	account.Balance = input.Balance
 
 	if err := h.DB.Save(&account).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -69,4 +76,30 @@ func (h *AccountHandler) UpdateAccount(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, account)
+}
+
+// DeleteAccount 删除账户
+func (h *AccountHandler) DeleteAccount(c *gin.Context) {
+	id := c.Param("id")
+	var account models.Account
+	
+	if err := h.DB.First(&account, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Account not found"})
+		return
+	}
+
+	// 检查是否有关联的交易记录
+	var transactionCount int64
+	h.DB.Model(&models.Transaction{}).Where("account_id = ?", id).Count(&transactionCount)
+	if transactionCount > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无法删除有关联交易记录的账户，请先删除相关交易"})
+		return
+	}
+
+	if err := h.DB.Delete(&account).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Account deleted successfully"})
 }

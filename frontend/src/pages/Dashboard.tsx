@@ -13,8 +13,8 @@ const Dashboard: React.FC = () => {
         accountApi.getAll(),
         transactionApi.getAll(),
       ]);
-      setAccounts(accountsRes);
-      setTransactions(transactionsRes);
+      setAccounts(Array.isArray(accountsRes) ? accountsRes : []);
+      setTransactions(Array.isArray(transactionsRes) ? transactionsRes : []);
     } catch (error) {
       console.error('获取数据失败:', error);
     }
@@ -70,6 +70,24 @@ const Dashboard: React.FC = () => {
           </Card>
         </Col>
       </Row>
+      {accounts.length > 0 && (
+        <Card title="金融账户" style={{ marginTop: 24 }}>
+          <Row gutter={16}>
+            {accounts.map((account) => (
+              <Col key={account.id} span={8}>
+                <Card size="small">
+                  <Statistic
+                    title={account.name}
+                    value={account.balance}
+                    precision={2}
+                    prefix="¥"
+                  />
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </Card>
+      )}
     </div>
   );
 };

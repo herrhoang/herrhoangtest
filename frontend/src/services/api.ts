@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Account, Transaction, Category } from '../types';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: 'http://localhost:8080/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -12,6 +12,7 @@ interface AccountAPI {
   getAll: () => Promise<Account[]>;
   create: (data: Partial<Account>) => Promise<Account>;
   update: (id: number, data: Partial<Account>) => Promise<Account>;
+  delete: (id: number) => Promise<void>;
 }
 
 interface TransactionAPI {
@@ -31,9 +32,10 @@ interface APIService {
 }
 
 export const accountApi: AccountAPI = {
-  getAll: () => api.get('/accounts').then(res => res.data),
+  getAll: () => api.get('/accounts').then(res => res.data.accounts || res.data),
   create: (data) => api.post('/accounts', data).then(res => res.data),
-  update: (id, data) => api.put(`/accounts/${id}`, data).then(res => res.data)
+  update: (id, data) => api.put(`/accounts/${id}`, data).then(res => res.data),
+  delete: (id) => api.delete(`/accounts/${id}`)
 };
 
 export const transactionApi: TransactionAPI = {

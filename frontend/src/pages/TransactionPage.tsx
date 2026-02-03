@@ -13,6 +13,7 @@ const TransactionPage: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
+  const transactionType = Form.useWatch('type', form);
 
   const fetchData = async () => {
     try {
@@ -21,9 +22,9 @@ const TransactionPage: React.FC = () => {
         accountApi.getAll(),
         categoryApi.getAll(),
       ]);
-      setTransactions(transactionsRes.data);
-      setAccounts(accountsRes.data);
-      setCategories(categoriesRes.data);
+      setTransactions(Array.isArray(transactionsRes) ? transactionsRes : []);
+      setAccounts(Array.isArray(accountsRes) ? accountsRes : []);
+      setCategories(Array.isArray(categoriesRes) ? categoriesRes : []);
     } catch (error) {
       message.error('获取数据失败');
     }
@@ -37,8 +38,12 @@ const TransactionPage: React.FC = () => {
     try {
       const values = await form.validateFields();
       const transactionData = {
-        ...values,
-        date: values.date.format('YYYY-MM-DD'),
+        account_id: values.account_id,
+        category_id: values.category_id,
+        amount: parseFloat(values.amount),
+        type: values.type,
+        description: values.note || '',
+        date: values.date ? values.date.format('YYYY-MM-DD') : undefined,
       };
       await transactionApi.create(transactionData);
       message.success('交易记录创建成功');
@@ -92,8 +97,8 @@ const TransactionPage: React.FC = () => {
     },
     {
       title: '备注',
-      dataIndex: 'note',
-      key: 'note',
+      dataIndex: 'description',
+      key: 'description',
     },
   ];
 
@@ -124,7 +129,15 @@ const TransactionPage: React.FC = () => {
           form.resetFields();
         }}
       >
-        <Form form={form} layout="vertical">
+        <Form
+          form={form}
+          layout="vertical"
+          onValuesChange={(changedValues) => {
+            if ('type' in changedValues) {
+              form.setFieldValue('category_id', undefined);
+            }
+          }}
+        >
           <Form.Item
             name="type"
             label="交易类型"
@@ -160,17 +173,20 @@ const TransactionPage: React.FC = () => {
             label="分类"
             rules={[{ required: true, message: '请选择分类' }]}
           >
-            <Select>
-              {categories.map(category => (
-                <Option key={category.id} value={category.id}>
-                  {category.name}
-                </Option>
-              ))}
+            <Select placeholder={transactionType ? '请选择分类' : '请先选择交易类型'}>
+              {categories
+                .filter(c => !transactionType || c.type === transactionType)
+                .map(category => (
+                  <Option key={category.id} value={category.id}>
+                    {category.name}
+                  </Option>
+                ))}
             </Select>
           </Form.Item>
           <Form.Item
             name="date"
             label="日期"
+            initialValue={dayjs()}
             rules={[{ required: true, message: '请选择日期' }]}
           >
             <DatePicker style={{ width: '100%' }} />

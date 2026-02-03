@@ -19,9 +19,9 @@ const TransactionList: React.FC = () => {
         accountApi.getAll(),
         categoryApi.getAll(),
       ]);
-      setTransactions(transactionsRes.data);
-      setAccounts(accountsRes.data);
-      setCategories(categoriesRes.data);
+      setTransactions(Array.isArray(transactionsRes) ? transactionsRes : []);
+      setAccounts(Array.isArray(accountsRes) ? accountsRes : []);
+      setCategories(Array.isArray(categoriesRes) ? categoriesRes : []);
     } catch (error) {
       message.error('获取数据失败');
     }

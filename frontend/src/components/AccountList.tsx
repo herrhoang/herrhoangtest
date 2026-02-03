@@ -10,8 +10,8 @@ const AccountList: React.FC = () => {
 
   const fetchAccounts = async () => {
     try {
-      const response = await accountApi.getAll();
-      setAccounts(response.data);
+      const data = await accountApi.getAll();
+      setAccounts(Array.isArray(data) ? data : []);
     } catch (error) {
       message.error('获取账户列表失败');
     }

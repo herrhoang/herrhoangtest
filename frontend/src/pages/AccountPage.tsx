@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal, Form, Input, message, Card } from 'antd';
-import { PlusOutlined, EditOutlined } from '@ant-design/icons';
+import { Table, Button, Modal, Form, Input, message, Card, Popconfirm } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Account } from '../types';
 import { accountApi } from '../services/api';
 
@@ -12,11 +12,21 @@ const AccountPage: React.FC = () => {
 
   const fetchAccounts = async () => {
     try {
-      const response = await accountApi.getAll();
-      setAccounts(response);
+      const data = await accountApi.getAll();
+      setAccounts(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch accounts:', error);
       message.error('获取账户列表失败');
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await accountApi.delete(id);
+      message.success('账户删除成功');
+      fetchAccounts();
+    } catch (error: any) {
+      message.error(error?.response?.data?.error || '删除失败');
     }
   };
 
@@ -88,13 +98,25 @@ const AccountPage: React.FC = () => {
       title: '操作',
       key: 'action',
       render: (_: any, record: Account) => (
-        <Button
-          type="link"
-          icon={<EditOutlined />}
-          onClick={() => handleEdit(record)}
-        >
-          编辑
-        </Button>
+        <>
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+          >
+            编辑
+          </Button>
+          <Popconfirm
+            title="确定要删除此账户吗？"
+            onConfirm={() => handleDelete(record.id)}
+            okText="确定"
+            cancelText="取消"
+          >
+            <Button type="link" danger icon={<DeleteOutlined />}>
+              删除
+            </Button>
+          </Popconfirm>
+        </>
       ),
     },
   ];

@@ -10,7 +10,33 @@ import (
 	"personal-finance/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
+
+// seedDefaultCategories 初始化默认收支分类
+func seedDefaultCategories(db *gorm.DB) {
+	var count int64
+	db.Model(&models.Category{}).Count(&count)
+	if count > 0 {
+		return
+	}
+	defaultCategories := []models.Category{
+		{Name: "工资", Type: "income"},
+		{Name: "奖金", Type: "income"},
+		{Name: "投资收益", Type: "income"},
+		{Name: "其他收入", Type: "income"},
+		{Name: "餐饮", Type: "expense"},
+		{Name: "交通", Type: "expense"},
+		{Name: "购物", Type: "expense"},
+		{Name: "住房", Type: "expense"},
+		{Name: "医疗", Type: "expense"},
+		{Name: "其他支出", Type: "expense"},
+	}
+	for _, c := range defaultCategories {
+		db.Create(&c)
+	}
+	log.Println("已初始化默认收支分类")
+}
 
 func main() {
 	// 加载配置
@@ -30,6 +56,9 @@ func main() {
 		&models.Transaction{},
 		&models.Budget{},
 	)
+
+	// 初始化默认分类（如果不存在）
+	seedDefaultCategories(db)
 
 	// 创建路由
 	r := gin.New()
@@ -69,6 +98,7 @@ func main() {
 			accounts.POST("", accountHandler.CreateAccount)
 			accounts.GET("", accountHandler.GetAccounts)
 			accounts.PUT("/:id", accountHandler.UpdateAccount)
+			accounts.DELETE("/:id", accountHandler.DeleteAccount)
 		}
 
 		// 交易相关路由
